@@ -47,6 +47,15 @@ public class UserController
 			return new ResponseEntity<UserDetails>(HttpStatus.FORBIDDEN);
 	}
 
+	@GetMapping("/UserDetailsID/{id}")
+	public ResponseEntity<UserDetails> getUserDetailsID(@PathVariable("id") int id)
+	{
+		UserDetails userDetails = userDetailsDAO.get(id);
+		if(userDetails != null)
+			userDetails.setPassword("");
+		return new ResponseEntity<UserDetails>(userDetails, HttpStatus.OK);
+	}
+	
 	@GetMapping("/UserDetails/{username}")
 	public ResponseEntity<UserDetails> getUserDetails(@PathVariable("username") String username)
 	{

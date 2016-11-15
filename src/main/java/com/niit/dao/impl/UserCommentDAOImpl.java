@@ -26,9 +26,9 @@ public class UserCommentDAOImpl implements UserCommentDAO
 	}
 
 	@Transactional
-	public List<UserComment> list()
+	public List<UserComment> list(char type, int threadID)
 	{
-		String hql = "from UserComment order by createdOn";
+		String hql = "from UserComment where type = '" + type + "' and threadID = " + threadID + " order by createdOn";
 		Query query = sessionFactory.getCurrentSession().createQuery(hql);
 		@SuppressWarnings("unchecked")
 		List<UserComment> list = (List<UserComment>) query.list();

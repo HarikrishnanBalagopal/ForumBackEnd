@@ -1,6 +1,5 @@
 package com.niit.model;
 
-import java.sql.Clob;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -8,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -30,10 +30,12 @@ public class UserComment
 
 	@Column(name = "thread_id")
 	private int threadID;
-	private Clob content;
+	
+	@Lob
+	private String content;
 	
 	@CreationTimestamp
-	@Column(name = "created_on")
+	@Column(name = "created_on", updatable = false)
 	private Date createdOn;
 
 	public int getId()
@@ -76,12 +78,12 @@ public class UserComment
 		this.threadID = threadID;
 	}
 
-	public Clob getContent()
+	public String getContent()
 	{
 		return content;
 	}
 
-	public void setContent(Clob content)
+	public void setContent(String content)
 	{
 		this.content = content;
 	}

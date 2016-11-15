@@ -1,6 +1,5 @@
 package com.niit.model;
 
-import java.sql.Clob;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -8,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.SequenceGenerator;
 import javax.validation.constraints.Min;
 
@@ -29,7 +29,9 @@ public class Blog
 
 	@NotBlank(message = "Title cannot be blank")
 	private String title;
-	private Clob content;
+	
+	@Lob
+	private String content;
 	private char status;
 	private String reason;
 
@@ -44,7 +46,7 @@ public class Blog
 	private int totalComments;
 
 	@CreationTimestamp
-	@Column(name = "created_on")
+	@Column(name = "created_on", updatable = false)
 	private Date createdOn;
 
 	public int getId()
@@ -77,12 +79,12 @@ public class Blog
 		this.title = title;
 	}
 
-	public Clob getContent()
+	public String getContent()
 	{
 		return content;
 	}
 
-	public void setContent(Clob content)
+	public void setContent(String content)
 	{
 		this.content = content;
 	}
