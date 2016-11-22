@@ -1,5 +1,6 @@
 package com.niit.controller;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpSession;
@@ -21,6 +22,8 @@ import com.niit.dao.UserDetailsDAO;
 import com.niit.model.Forum;
 import com.niit.model.UserComment;
 import com.niit.model.UserDetails;
+
+import oracle.sql.DATE;
 
 @RestController
 public class ForumController
@@ -67,13 +70,21 @@ public class ForumController
 		return new ResponseEntity<List<UserComment>>(listComments, HttpStatus.OK);
 	}
 
-	@PostMapping("/CreateForum")
-	public ResponseEntity<Void> createForum(@RequestBody Forum forum, UriComponentsBuilder ucBuilder)
+	@PostMapping("/CreateThread")
+	public ResponseEntity<String> createThread(@RequestBody Forum forum, UriComponentsBuilder ucBuilder)
 	{
+		UserDetails userDetails = (UserDetails) session.getAttribute("user");
+		if(userDetails == null || userDetails.getStatus() != 'Y')
+			return new ResponseEntity<String>(HttpStatus.FORBIDDEN);
+		forum.setUserID(userDetails.getId());
+		if(forum.getTitle() == null || forum.getTitle().equals(""))
+			return new ResponseEntity<String>("title", HttpStatus.CONFLICT);
+		forum.setLastComment(new Date());
+		forum.setTotalComments(0);
 		forumDAO.save(forum);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setLocation(ucBuilder.path("Forum/{id}/").buildAndExpand(forum.getId()).toUri());
-		return new ResponseEntity<Void>(headers, HttpStatus.CREATED);
+		return new ResponseEntity<String>("created", headers, HttpStatus.CREATED);
 	}
 	
 	@PostMapping("/CreateComment")

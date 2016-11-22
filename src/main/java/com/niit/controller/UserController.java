@@ -38,8 +38,8 @@ public class UserController
 		return new ResponseEntity<String>(userDetailsDAO.get(id).getUsername(), HttpStatus.OK);
 	}
 
-	@GetMapping("/UserDetailsAdmin/{id}")
-	public ResponseEntity<UserDetails> getUserDetailsAdmin(@PathVariable("id") int id)
+	@GetMapping("/UserDetailsIDAdmin/{id}")
+	public ResponseEntity<UserDetails> getUserDetailsIDAdmin(@PathVariable("id") int id)
 	{
 		if(isAdmin())
 			return new ResponseEntity<UserDetails>(userDetailsDAO.get(id), HttpStatus.OK);
@@ -55,7 +55,7 @@ public class UserController
 			userDetails.setPassword("");
 		return new ResponseEntity<UserDetails>(userDetails, HttpStatus.OK);
 	}
-	
+
 	@GetMapping("/UserDetails/{username}")
 	public ResponseEntity<UserDetails> getUserDetails(@PathVariable("username") String username)
 	{
@@ -106,6 +106,12 @@ public class UserController
 	@GetMapping("/Logout")
 	public ResponseEntity<Void> logout()
 	{
+		UserDetails user = (UserDetails) session.getAttribute("user");
+		if(user != null)
+		{
+			user.setOnlineStatus('N');
+			userDetailsDAO.update(user);
+		}
 		session.invalidate();
 		return new ResponseEntity<Void>(HttpStatus.OK);
 	}
@@ -120,6 +126,7 @@ public class UserController
 		if(userDetails.getRole() != 'S' && userDetails.getRole() != 'P')
 			return new ResponseEntity<String>("role", HttpStatus.CONFLICT);
 		userDetails.setStatus('N');
+		userDetails.setOnlineStatus('N');
 		if(userDetailsDAO.save(userDetails))
 		{
 			session.setAttribute("user", userDetails);
