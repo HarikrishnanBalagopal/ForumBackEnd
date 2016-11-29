@@ -10,6 +10,14 @@ public interface FriendDAO
 
 	public Friend get(int id);
 
+	public Friend get(int userID, int friendID);
+
+	public List<Friend> getAll(int userID);
+
+	public boolean request(int userID, int friendID);
+
+	public boolean updateRequest(int userID, int friendID, boolean accepted);
+
 	public boolean save(Friend friend);
 
 	public boolean update(Friend friend);

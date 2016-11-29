@@ -16,94 +16,95 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.niit.dao.ForumDAO;
+import com.niit.dao.BlogDAO;
 import com.niit.dao.UserCommentDAO;
 import com.niit.dao.UserDetailsDAO;
-import com.niit.model.Forum;
+import com.niit.model.Blog;
 import com.niit.model.UserComment;
 import com.niit.model.UserDetails;
 
 import oracle.sql.DATE;
 
 @RestController
-public class ForumController
+public class BlogController
 {
 	@Autowired
-	ForumDAO forumDAO;
+	BlogDAO blogDAO;
 
 	@Autowired
 	UserDetailsDAO userDetailsDAO;
-	
+
 	@Autowired
 	UserCommentDAO userCommentDAO;
 
 	@Autowired
 	HttpSession session;
 
-	@GetMapping("/Forum")
-	public ResponseEntity<List> getAllTopics()
+	@GetMapping("/Blog")
+	public ResponseEntity<List> getAllBlogs()
 	{
-		List listForum = forumDAO.list();
-		if(listForum == null || listForum.isEmpty())
+		List listBlog = blogDAO.list();
+		if(listBlog == null || listBlog.isEmpty())
 			return new ResponseEntity<List>(HttpStatus.NO_CONTENT);
 
-		return new ResponseEntity<List>(listForum, HttpStatus.OK);
+		return new ResponseEntity<List>(listBlog, HttpStatus.OK);
 	}
 
-	@GetMapping("/Forum/{id}")
-	public ResponseEntity<Forum> getTopic(@PathVariable("id") int id)
+	@GetMapping("/Blog/{id}")
+	public ResponseEntity<Blog> getBlog(@PathVariable("id") int id)
 	{
-		Forum forum = forumDAO.get(id);
-		if(forum == null)
-			return new ResponseEntity<Forum>(HttpStatus.NO_CONTENT);
+		Blog blog = blogDAO.get(id);
+		if(blog == null)
+			return new ResponseEntity<Blog>(HttpStatus.NO_CONTENT);
 
-		return new ResponseEntity<Forum>(forum, HttpStatus.OK);
+		return new ResponseEntity<Blog>(blog, HttpStatus.OK);
 	}
 
-	@GetMapping("/ForumComments/{id}")
+	@GetMapping("/BlogComments/{id}")
 	public ResponseEntity<List<UserComment>> getAllComments(@PathVariable("id") int id)
 	{
-		List<UserComment> listComments = userCommentDAO.list('F', id);
+		List<UserComment> listComments = userCommentDAO.list('B', id);
 		if(listComments == null || listComments.isEmpty())
 			return new ResponseEntity<List<UserComment>>(HttpStatus.NO_CONTENT);
 
 		return new ResponseEntity<List<UserComment>>(listComments, HttpStatus.OK);
 	}
 
-	@PostMapping("/CreateThread")
-	public ResponseEntity<String> createThread(@RequestBody Forum forum, UriComponentsBuilder ucBuilder)
+	@PostMapping("/CreateBlog")
+	public ResponseEntity<String> createBlog(@RequestBody Blog blog, UriComponentsBuilder ucBuilder)
 	{
 		UserDetails userDetails = (UserDetails) session.getAttribute("user");
 		if(userDetails == null || userDetails.getStatus() != 'Y')
 			return new ResponseEntity<String>(HttpStatus.FORBIDDEN);
-		forum.setUserID(userDetails.getId());
-		if(forum.getTitle() == null || forum.getTitle().equals(""))
+		blog.setUserID(userDetails.getId());
+		if(blog.getTitle() == null || blog.getTitle().equals(""))
 			return new ResponseEntity<String>("title", HttpStatus.CONFLICT);
-		forum.setLastComment(new Date());
-		forum.setTotalComments(0);
-		forumDAO.save(forum);
+		blog.setStatus('N');
+		blog.setLikes(0);
+		blog.setDislikes(0);
+		blog.setTotalComments(0);
+		blogDAO.save(blog);
 		HttpHeaders headers = new HttpHeaders();
-		headers.setLocation(ucBuilder.path("Forum/{id}/").buildAndExpand(forum.getId()).toUri());
+		headers.setLocation(ucBuilder.path("Blog/{id}/").buildAndExpand(blog.getId()).toUri());
 		return new ResponseEntity<String>("created", headers, HttpStatus.CREATED);
 	}
-	
-	@PostMapping("/CreateForumComment")
+
+	@PostMapping("/CreateBlogComment")
 	public ResponseEntity<Void> createComment(@RequestBody UserComment userComment, UriComponentsBuilder ucBuilder)
 	{
 		UserDetails userDetails = (UserDetails) session.getAttribute("user");
 		if(userDetails == null || userDetails.getStatus() != 'Y')
 			return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
-		Forum forum = forumDAO.get(userComment.getThreadID());
-		if(forum == null)
+		Blog blog = blogDAO.get(userComment.getThreadID());
+		if(blog == null)
 			return new ResponseEntity<Void>(HttpStatus.CONFLICT);
 		userComment.setUserID(userDetails.getId());
-		userComment.setType('F');
+		userComment.setType('B');
 		userCommentDAO.save(userComment);
-		forum.setTotalComments(forum.getTotalComments() + 1);
-		forum.setLastComment(userComment.getCreatedOn());
-		forumDAO.update(forum);
+		blog.setTotalComments(blog.getTotalComments() + 1);
+		blogDAO.update(blog);
 		HttpHeaders headers = new HttpHeaders();
-		headers.setLocation(ucBuilder.path("Forum/{id}/").buildAndExpand(userComment.getThreadID()).toUri());
+		headers.setLocation(ucBuilder.path("Blog/{id}/").buildAndExpand(userComment.getThreadID()).toUri());
 		return new ResponseEntity<Void>(headers, HttpStatus.CREATED);
 	}
 }
