@@ -35,7 +35,7 @@ public class FriendController
 	{
 		log.debug("Method Start: requestFriend");
 		UserDetails userDetails = (UserDetails)session.getAttribute("user");
-		if(userDetails == null || userDetails.getStatus() != 'Y')
+		if(userDetails == null || userDetails.getStatus() != 'Y' || userDetails.getId() == id)
 		{
 			log.debug("Method End: requestFriend-FORBIDDEN");
 			return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
@@ -81,6 +81,8 @@ public class FriendController
 		}
 		else
 		{
+			log.info("LoggedIn:" + userDetails.toString());
+			log.info("Friend:" + friendDetails.toString());
 			log.debug("Method End: updateFriendRequest-CONFLICT");
 			return new ResponseEntity<Void>(HttpStatus.CONFLICT);
 		}	

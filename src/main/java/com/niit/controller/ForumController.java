@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -33,12 +36,22 @@ public class ForumController
 
 	@Autowired
 	UserDetailsDAO userDetailsDAO;
-	
+
 	@Autowired
 	UserCommentDAO userCommentDAO;
 
 	@Autowired
 	HttpSession session;
+
+	Logger log = LoggerFactory.getLogger(UserController.class);
+
+	private boolean isAdmin()
+	{
+		log.debug("Method Start: isAdmin");
+		UserDetails ud = (UserDetails) session.getAttribute("user");
+		log.debug("Method End: isAdmin");
+		return ud != null && ud.getRole() == 'A';
+	}
 
 	@GetMapping("/Forum")
 	public ResponseEntity<List> getAllTopics()
@@ -86,8 +99,21 @@ public class ForumController
 		headers.setLocation(ucBuilder.path("Forum/{id}/").buildAndExpand(forum.getId()).toUri());
 		return new ResponseEntity<String>("created", headers, HttpStatus.CREATED);
 	}
-	
-	@PostMapping("/CreateForumComment")
+
+	@PostMapping("/DeleteThreadAdmin")
+	public ResponseEntity<Void> deleteThreadAdmin(@RequestParam("id") int id)
+	{
+		if(isAdmin())
+		{
+			if(forumDAO.delete(id) && userCommentDAO.deleteAll('F', id))
+				return new ResponseEntity<Void>(HttpStatus.OK);
+			else
+				return new ResponseEntity<Void>(HttpStatus.CONFLICT);
+		}
+		return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
+	}
+
+	@PostMapping("/CreateThreadComment")
 	public ResponseEntity<Void> createComment(@RequestBody UserComment userComment, UriComponentsBuilder ucBuilder)
 	{
 		UserDetails userDetails = (UserDetails) session.getAttribute("user");
@@ -105,5 +131,31 @@ public class ForumController
 		HttpHeaders headers = new HttpHeaders();
 		headers.setLocation(ucBuilder.path("Forum/{id}/").buildAndExpand(userComment.getThreadID()).toUri());
 		return new ResponseEntity<Void>(headers, HttpStatus.CREATED);
+	}
+
+	@PostMapping("/EditThreadCommentAdmin")
+	public ResponseEntity<Void> editComment(@RequestBody UserComment userComment)
+	{
+		if(isAdmin())
+		{
+			if(userCommentDAO.update(userComment))
+				return new ResponseEntity<Void>(HttpStatus.OK);
+			else
+				return new ResponseEntity<Void>(HttpStatus.CONFLICT);
+		}
+		return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
+	}
+
+	@PostMapping("/DeleteThreadCommentAdmin")
+	public ResponseEntity<Void> deleteComment(@RequestParam("id") int id)
+	{
+		if(isAdmin())
+		{
+			if(userCommentDAO.delete(id))
+				return new ResponseEntity<Void>(HttpStatus.OK);
+			else
+				return new ResponseEntity<Void>(HttpStatus.CONFLICT);
+		}
+		return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
 	}
 }

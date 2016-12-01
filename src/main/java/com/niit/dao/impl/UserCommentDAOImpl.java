@@ -88,4 +88,21 @@ public class UserCommentDAOImpl implements UserCommentDAO
 
 		return true;
 	}
+
+	@Transactional
+	public boolean deleteAll(char type, int threadID)
+	{
+		String hql = "delete from UserComment where type = '" + type + "' and threadID = " + threadID;
+		Query query = sessionFactory.getCurrentSession().createQuery(hql);
+		try
+		{
+			query.executeUpdate();
+		}catch(Exception e)
+		{
+			System.out.println("Exception on deleting all UserComments of thread " + threadID + " :" + e);
+			return false;
+		}
+
+		return true;
+	}
 }

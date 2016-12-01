@@ -90,7 +90,7 @@ public class FriendDAOImpl implements FriendDAO
 	{
 		char accept = accepted ? 'Y' : 'R';
 		Friend f1 = get(userID, friendID);
-		if(f1 == null || friend.getStatus() != '1')
+		if(f1 == null || f1.getStatus() != '1')
 			return false;
 		f1.setStatus(accept);
 		update(f1);

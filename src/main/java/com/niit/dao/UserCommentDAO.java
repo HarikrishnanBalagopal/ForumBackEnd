@@ -15,4 +15,6 @@ public interface UserCommentDAO
 	public boolean update(UserComment userComment);
 
 	public boolean delete(int id);
+	
+	public boolean deleteAll(char type, int threadID);
 }
