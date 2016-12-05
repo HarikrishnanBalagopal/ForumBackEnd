@@ -26,6 +26,13 @@ public class FriendDAOImpl implements FriendDAO
 	}
 
 	@Transactional
+	public List list(int id)
+	{
+		String hql = "select D, F.status from Friend F, UserDetails D where F.userID = " + id + " and F.friendID = D.id";
+		return sessionFactory.getCurrentSession().createQuery(hql).list();
+	}
+
+	@Transactional
 	public List<Friend> list()
 	{
 		String hql = "from Friend";
@@ -98,7 +105,7 @@ public class FriendDAOImpl implements FriendDAO
 		Friend f2 = get(friendID, userID);
 		f2.setStatus(accept);
 		update(f2);
-		
+
 		return true;
 	}
 

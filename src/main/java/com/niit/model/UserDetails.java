@@ -30,7 +30,7 @@ public class UserDetails
 	@NotBlank(message = "Email cannot be blank")
 	private String email;
 	private char role;
-	private char status;
+	private char status = 'N';
 	private String reason;
 	private String address;
 

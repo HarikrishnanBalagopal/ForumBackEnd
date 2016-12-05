@@ -29,7 +29,6 @@ public class ForumDAOImpl implements ForumDAO
 	public List list()
 	{
 		String hql = "select F, D.username from Forum F inner join UserDetails D on F.userID = D.id order by F.lastComment desc";
-		//String hql = "from Forum order by lastComment";
 		return sessionFactory.getCurrentSession().createQuery(hql).list();
 	}
 

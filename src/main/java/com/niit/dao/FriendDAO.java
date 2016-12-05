@@ -8,6 +8,8 @@ public interface FriendDAO
 {
 	public List<Friend> list();
 
+	public List list(int id);
+
 	public Friend get(int id);
 
 	public Friend get(int userID, int friendID);

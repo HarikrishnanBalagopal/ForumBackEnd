@@ -2,6 +2,8 @@ package com.niit.controller;
 
 import java.util.List;
 
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
@@ -16,10 +18,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.niit.dao.UserDetailsDAO;
 import com.niit.model.UserDetails;
+import com.niit.util.FileUtil;
 
 @RestController
 public class UserController
@@ -38,6 +42,34 @@ public class UserController
 		UserDetails ud = (UserDetails) session.getAttribute("user");
 		log.debug("Method End: isAdmin");
 		return ud != null && ud.getRole() == 'A';
+	}
+
+	@PostMapping("/UploadImage")
+	public ResponseEntity<Void> uploadImage(@RequestParam("file") MultipartFile file, HttpServletRequest request)
+	{
+		log.debug("Method Start: uploadImage");
+		UserDetails userDetails = (UserDetails) session.getAttribute("user");
+		if(userDetails == null || userDetails.getStatus() != 'Y')
+		{
+			log.debug("Method End: uploadImage-FORBIDDEN");
+			return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
+		}
+
+		if(!file.isEmpty())
+		{
+			ServletContext context = request.getServletContext();
+			String path = context.getRealPath("./resources/images/" + userDetails.getId() + ".jpg");
+
+			log.info("Path = " + path);
+			log.info("File name = " + file.getOriginalFilename());
+
+			FileUtil.saveImage(file, path);
+			log.debug("Method End: uploadImage-OK");
+			return new ResponseEntity<Void>(HttpStatus.OK);
+		}
+
+		log.debug("Method End: uploadImage-CONFLICT");
+		return new ResponseEntity<Void>(HttpStatus.CONFLICT);
 	}
 
 	@PostMapping("/GetUsername")
@@ -69,6 +101,18 @@ public class UserController
 			log.debug("Method End: getUserDetailsIDAdmin-FORBIDDEN");
 			return new ResponseEntity<UserDetails>(HttpStatus.FORBIDDEN);
 		}
+	}
+
+	@GetMapping("/UserDetailsAll")
+	public ResponseEntity<List<UserDetails>> getUserDetailsAll()
+	{
+		log.debug("Method Start: getUserDetailsAll");
+
+		List<UserDetails> l = userDetailsDAO.list();
+		for(UserDetails d : l)
+			d.setPassword("");
+		log.debug("Method End: getUserDetailsAllAdmin-OK");
+		return new ResponseEntity<List<UserDetails>>(l, HttpStatus.OK);
 	}
 
 	@GetMapping("/UserDetailsAllAdmin")
