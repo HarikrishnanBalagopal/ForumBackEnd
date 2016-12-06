@@ -141,7 +141,7 @@ public class JobController
 		log.debug("Method Start: deleteListingAdmin");
 		if(isAdmin())
 		{
-			if(jobDAO.delete(id))
+			if(jobDAO.delete(id) && jobApplicationDAO.deleteAll(id))
 			{
 				log.debug("Method End: deleteListingAdmin-OK");
 				return new ResponseEntity<Void>(HttpStatus.OK);

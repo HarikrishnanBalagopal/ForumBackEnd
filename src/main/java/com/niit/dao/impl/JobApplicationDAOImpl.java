@@ -99,4 +99,21 @@ public class JobApplicationDAOImpl implements JobApplicationDAO
 
 		return true;
 	}
+	
+	@Transactional
+	public boolean deleteAll(int id)
+	{
+		String hql = "delete from JobApplication where jobID = " + id;
+		Query query = sessionFactory.getCurrentSession().createQuery(hql);
+		try
+		{
+			query.executeUpdate();
+		}catch(Exception e)
+		{
+			System.out.println("Exception on deleting all JobApplications of listing " + id + " :" + e);
+			return false;
+		}
+
+		return true;
+	}
 }

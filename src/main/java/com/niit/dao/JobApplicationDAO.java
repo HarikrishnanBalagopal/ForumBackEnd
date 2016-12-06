@@ -17,4 +17,6 @@ public interface JobApplicationDAO
 	public boolean update(JobApplication jobApplication);
 
 	public boolean delete(int id);
+	
+	public boolean deleteAll(int id);
 }
