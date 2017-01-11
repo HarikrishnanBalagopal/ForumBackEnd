@@ -43,7 +43,7 @@ public class ForumController
 	@Autowired
 	HttpSession session;
 
-	Logger log = LoggerFactory.getLogger(UserController.class);
+	Logger log = LoggerFactory.getLogger(ForumController.class);
 
 	private boolean isAdmin()
 	{
@@ -56,20 +56,30 @@ public class ForumController
 	@GetMapping("/Forum")
 	public ResponseEntity<List> getAllTopics()
 	{
+		log.debug("Method Start: getAllTopics");
 		List listForum = forumDAO.list();
 		if(listForum == null || listForum.isEmpty())
+		{
+			log.debug("Method End: getAllTopics-NO_CONTENT");
 			return new ResponseEntity<List>(HttpStatus.NO_CONTENT);
+		}
 
+		log.debug("Method End: getAllTopics-OK");
 		return new ResponseEntity<List>(listForum, HttpStatus.OK);
 	}
 
 	@GetMapping("/Forum/{id}")
 	public ResponseEntity<Forum> getTopic(@PathVariable("id") int id)
 	{
+		log.debug("Method Start: getTopic");
 		Forum forum = forumDAO.get(id);
 		if(forum == null)
+		{
+			log.debug("Method End: getTopic-NO_CONTENT");
 			return new ResponseEntity<Forum>(HttpStatus.NO_CONTENT);
+		}
 
+		log.debug("Method End: getTopic-OK");
 		return new ResponseEntity<Forum>(forum, HttpStatus.OK);
 	}
 

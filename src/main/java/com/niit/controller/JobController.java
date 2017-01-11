@@ -42,7 +42,7 @@ public class JobController
 	@Autowired
 	HttpSession session;
 
-	Logger log = LoggerFactory.getLogger(UserController.class);
+	Logger log = LoggerFactory.getLogger(JobController.class);
 
 	private boolean isAdmin()
 	{
